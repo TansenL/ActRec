@@ -232,68 +232,71 @@ class ActRec:
 
         '''
 
-        weightType = tf.float32
+        weightType = self.TFVAR_TYPE
         images = tf.cast(images, weightType)
         #The first CONV layer 224*224*3
-        convImageKernel1 = tf.Variable(tf.random_normal([7,7,3,96],stddev=5e-2),name="Conv_Image_1",dtype= weightType)
-        convImageBaise1 = tf.Variable(tf.random_normal([96]),dtype= weightType, name= "ConvBase_Iamge_1")
-        imgNet = tf.nn.conv2d(images, convImageKernel1,[1,2,2,1], padding= 'SAME')
-        imgNet = tf.nn.bias_add(imgNet, convImageBaise1)
-        imgNet = tf.nn.relu(imgNet)
-        imgNet = tf.nn.max_pool(imgNet,ksize= [1,3,3,1], strides= [1,2,2,1], padding = "SAME")
-        imgNet = tf.nn.lrn(imgNet)
+        with tf.variable_scope("ImageConv1") as scope:
+            convImageKernel1 = tf.Variable(tf.random_normal([7,7,3,96],stddev=5e-2),name="Kernel",dtype= weightType)
+            convImageBaise1 = tf.Variable(tf.random_normal([96]),dtype= weightType, name= "Baise")
+            imgNet = tf.nn.conv2d(images, convImageKernel1,[1,2,2,1], padding= 'SAME')
+            imgNet = tf.nn.bias_add(imgNet, convImageBaise1)
+            imgNet = tf.nn.relu(imgNet, name= scope.name)
+            imgNet = tf.nn.max_pool(imgNet,ksize= [1,3,3,1], strides= [1,2,2,1], padding = "SAME" )
+            imgNet = tf.nn.lrn(imgNet, name= "LRN")
 
         #The Second CONV layer  56*56*96
-        convImageKernel2 = tf.Variable(tf.random_normal([5,5,96,258], stddev= 5e-2), dtype= weightType, name= "convImageKernel2")
-        convImageBaise2 = tf.Variable(tf.random_normal([258]),dtype= weightType, name= "convImageBaise2")
-        imgNet = tf.nn.conv2d(imgNet, convImageKernel2, strides= [1,2,2,1], padding= 'SAME')
-        imgNet = tf.nn.bias_add(imgNet, convImageBaise2)
-        imgNet = tf.nn.relu(imgNet)
-        imgNet = tf.nn.max_pool(imgNet, ksize= [1,3,3,1], strides= [1,2,2,1], padding= 'SAME')
-        imgNet = tf.nn.lrn(imgNet)
+        with tf.variable_scope("ImageConv2") as scope:
+            convImageKernel2 = tf.Variable(tf.random_normal([5,5,96,258], stddev= 5e-2), dtype= weightType, name= "Kernel")
+            convImageBaise2 = tf.Variable(tf.random_normal([258]),dtype= weightType, name= "Baise")
+            imgNet = tf.nn.conv2d(imgNet, convImageKernel2, strides= [1,2,2,1], padding= 'SAME')
+            imgNet = tf.nn.bias_add(imgNet, convImageBaise2)
+            imgNet = tf.nn.relu(imgNet, name= scope.name)
+            imgNet = tf.nn.max_pool(imgNet, ksize= [1,3,3,1], strides= [1,2,2,1], padding= 'SAME')
+            imgNet = tf.nn.lrn(imgNet)
 
         #The Third CONV layer 14*14*258
-        convImageKernel3 = tf.Variable(tf.random_normal([3,3,258,512], stddev= 5e-2), dtype= weightType, name= "convImageKernel3")
-        convImageBaise3 = tf.Variable(tf.random_normal([512]),dtype= weightType, name= "convImageBaise3")
-        imgNet = tf.nn.conv2d(imgNet, convImageKernel3, strides= [1,1,1,1], padding= 'SAME')
-        imgNet = tf.nn.bias_add(imgNet, convImageBaise3)
-        imgNet = tf.nn.relu(imgNet)
+        with tf.variable_scope("ImageConv3") as scope:
+            convImageKernel3 = tf.Variable(tf.random_normal([3,3,258,512], stddev= 5e-2), dtype= weightType, name= "Kernel")
+            convImageBaise3 = tf.Variable(tf.random_normal([512]),dtype= weightType, name= "Baise")
+            imgNet = tf.nn.conv2d(imgNet, convImageKernel3, strides= [1,1,1,1], padding= 'SAME')
+            imgNet = tf.nn.bias_add(imgNet, convImageBaise3)
+            imgNet = tf.nn.relu(imgNet , name= scope.name)
         
         #The Fourth CONV layer 14*14*512
-        convImageKernel4 = tf.Variable(tf.random_normal([3,3,512,512], stddev= 5e-2), dtype= weightType, name= "convImageKernel4")
-        convImageBaise4 = tf.Variable(tf.random_normal([512]),dtype= weightType, name= "convImageBaise4")
-        imgNet = tf.nn.conv2d(imgNet, convImageKernel4, strides= [1,1,1,1], padding= 'SAME')
-        imgNet = tf.nn.bias_add(imgNet, convImageBaise4)
-        imgNet = tf.nn.relu(imgNet)
+        with tf.variable_scope("ImageConv4") as scope:
+            convImageKernel4 = tf.Variable(tf.random_normal([3,3,512,512], stddev= 5e-2), dtype= weightType, name= "Kernel")
+            convImageBaise4 = tf.Variable(tf.random_normal([512]),dtype= weightType, name= "Baise")
+            imgNet = tf.nn.conv2d(imgNet, convImageKernel4, strides= [1,1,1,1], padding= 'SAME')
+            imgNet = tf.nn.bias_add(imgNet, convImageBaise4)
+            imgNet = tf.nn.relu(imgNet, name= scope.name)
 
         #The Fifth CONV layer 14*14*512
-        convImageKernel5 = tf.Variable(tf.random_normal([3,3,512,512], stddev= 5e-2), dtype= weightType, name= "convImageKernel5")
-        convImageBaise5 = tf.Variable(tf.random_normal([512]),dtype= weightType, name= "convImageBaise5")
-        imgNet = tf.nn.conv2d(imgNet, convImageKernel5, strides= [1,1,1,1], padding= 'SAME')
-        imgNet = tf.nn.bias_add(imgNet, convImageBaise5)
-        imgNet = tf.nn.relu(imgNet)
-        imgNet = tf.nn.max_pool(imgNet, ksize= [1,3,3,1], strides = [1,2,2,1], padding = 'SAME')
+        with tf.variable_scope("ImageConv5") as scope:
+            convImageKernel5 = tf.Variable(tf.random_normal([3,3,512,512], stddev= 5e-2), dtype= weightType, name= "Kernel")
+            convImageBaise5 = tf.Variable(tf.random_normal([512]),dtype= weightType, name= "Baise")
+            imgNet = tf.nn.conv2d(imgNet, convImageKernel5, strides= [1,1,1,1], padding= 'SAME')
+            imgNet = tf.nn.bias_add(imgNet, convImageBaise5)
+            imgNet = tf.nn.relu(imgNet, name= scope.name)
+            imgNet = tf.nn.max_pool(imgNet, ksize= [1,3,3,1], strides = [1,2,2,1], padding = 'SAME')
 
         #Flatten the tensor
         imgNet = tf.reshape(imgNet,[-1, 7*7*512])
         
         #The Full-Connect layer 1*25088
-        fullConnectKernel1 = tf.Variable(tf.random_normal([7*7*512, 4096], stddev= 5e-2), dtype= weightType, name= "fullConnectKernel1")
-        fullConnectBaise1 = tf.Variable(tf.random_normal([4096],stddev= 5e-2), dtype= weightType, name= "fullConnectBaise1")
-        imgNet = tf.nn.xw_plus_b(imgNet,fullConnectKernel1, fullConnectBaise1)
-        imgNet = tf.nn.relu(imgNet)
-        imgNet = tf.nn.dropout(imgNet,keepPro)
+        with tf.variable_scope("ImageFC1") as scope:
+            fullConnectKernel1 = tf.Variable(tf.random_normal([7*7*512, 4096], stddev= 5e-2), dtype= weightType, name= "Kernel")
+            fullConnectBaise1 = tf.Variable(tf.random_normal([4096],stddev= 5e-2), dtype= weightType, name= "Baise")
+            imgNet = tf.nn.xw_plus_b(imgNet,fullConnectKernel1, fullConnectBaise1)
+            imgNet = tf.nn.relu(imgNet, name= scope.name)
+            imgNet = tf.nn.dropout(imgNet,keepPro)
 
         #The Full-Connect layer 1*4096
-        fullConnectKernel2 = tf.Variable(tf.random_normal([4096, 2048], stddev= 5e-2), dtype= weightType, name= "fullConnectKernel2")
-        fullConnectBaise2 = tf.Variable(tf.random_normal([2048],stddev= 5e-2), dtype= weightType, name= "fullConnectBaise2")
-        imgNet = tf.nn.xw_plus_b(imgNet,fullConnectKernel2, fullConnectBaise2)
-        imgNet = tf.nn.relu(imgNet)
-        imgNet = tf.nn.dropout(imgNet,keepPro, name= "ImgNet")
-
-        #The Softmax layer
-        # imgNet = tf.nn.softmax(imgNet)
-        #
+        with tf.variable_scope("ImageFC2") as scope:
+            fullConnectKernel2 = tf.Variable(tf.random_normal([4096, 2048], stddev= 5e-2), dtype= weightType, name= "Kernel")
+            fullConnectBaise2 = tf.Variable(tf.random_normal([2048],stddev= 5e-2), dtype= weightType, name= "Baise")
+            imgNet = tf.nn.xw_plus_b(imgNet,fullConnectKernel2, fullConnectBaise2)
+            imgNet = tf.nn.relu(imgNet, name= scope.name)
+            imgNet = tf.nn.dropout(imgNet,keepPro, name= "ImgNet")
         return imgNet
     def opticalFlowStream(self, opticalFlows, keepPro):
         ''' Construct a optical stream CNN network
@@ -388,6 +391,8 @@ class ActRec:
         fusionKernel = tf.Variable(tf.random_normal([4096,51], stddev= 5e-2), dtype= tf.float32, name= "fusionKernel")
         fusionBaise = tf.Variable(tf.random_normal([51],stddev= 5e-2), dtype= tf.float32, name= "fusionBaise")
         inferNet = tf.nn.xw_plus_b(fusiNet,fusionKernel, fusionBaise, name= "InferNet")
+
+        tf.add_to_collection("InferNet", inferNet)
         # inferNet = tf.nn.relu(inferNet)
         return inferNet
     def actrecTrain(self,dataStr):
@@ -402,11 +407,11 @@ class ActRec:
         '''
         
         #Placeholders
-        tarinRate = tf.placeholder(tf.float32)
-        trainDroup = tf.placeholder(tf.float32)
-        trainImg = tf.placeholder(tf.float32,shape= [51,224,224,3])
-        trainOptical = tf.placeholder(tf.float32, shape= [51, 224, 224, 10])
-        trainLabel = tf.placeholder(tf.float32, shape= [51, self.CLASS_NUM])
+        tarinRate = tf.placeholder(tf.float32, name="learRate")
+        trainDroup = tf.placeholder(tf.float32, name="droupOut")
+        trainImg = tf.placeholder(tf.float32,shape= [51,224,224,3], name="imgInput")
+        trainOptical = tf.placeholder(tf.float32, shape= [51, 224, 224, 10], name= "opflows")
+        trainLabel = tf.placeholder(tf.float32, shape= [51, self.CLASS_NUM], name= "labels")
 
         twoStreamNet = self.infereNet(trainImg, trainOptical,trainDroup)
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits= twoStreamNet, labels= trainLabel))
